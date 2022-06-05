@@ -191,6 +191,74 @@
     </div>
 </div>
 
+<div class="container logged-visible" style="display: none">
+    </br></br></br>
+    <div class="table-wrap">
+        <table class="table table-borderless table-responsive title-table">
+            <thead>
+            <tr>
+                <th><h1>Usuń przepis</h1></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="container logged-visible" style="display: none">
+    <div class="card card-container">
+        <p class="profile-name-card"></p>
+        <form class="form-signin" onsubmit="return false" id="deleteRecipeForm">
+            <span class="reauth-un"></span>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-outline">
+                        <label class="form-label" for="NameOf">Wybierz przepis, który chcesz usunąć: </label>
+                        <input list="recipesToDelete" name = recipeName id="recipeName" class="form-control" required>
+                        <datalist id = "recipesToDelete">
+                        </datalist>
+                    </div>
+                </div>
+            </div>
+            </br>
+            <button class="btn-lg btn-info btn-block" type="submit" onClick={deleteRecipe(deleteRecipeForm)}>Usuń</button>
+        </form>
+    </div>
+</div>
+
+<div class="container logged-visible" style="display: none">
+    </br></br></br>
+    <div class="table-wrap">
+        <table class="table table-borderless table-responsive title-table">
+            <thead>
+            <tr>
+                <th><h1>Usuń użytkownika</h1></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="container admin-visible" style="display: none">
+    <div class="card card-container">
+        <p class="profile-name-card"></p>
+        <form class="form-signin" onsubmit="return false" id="deleteUserForm">
+            <span class="reauth-un"></span>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-outline">
+                        <label class="form-label" for="NameOf">Wybierz użytkownika, którego chcesz usunąć: </label>
+                        <input list="usersToDelete" name = username id="username" class="form-control" required>
+                        <datalist id = "usersToDelete">
+                        </datalist>
+                    </div>
+                </div>
+            </div>
+            </br>
+            <button class="btn-lg btn-info btn-block" type="submit" onClick={deleteUser(deleteUserForm)}>Usuń</button>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     </br></br></br>
     <div class="table-wrap">

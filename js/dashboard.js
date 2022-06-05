@@ -1,8 +1,8 @@
 function GetBindData() {
 
     const url = "http://localhost:8080/RecipeApp/dashboard/all";
-    const un = sessionStorage.getItem("username");
-    const pw = sessionStorage.getItem("password");
+    // const un = sessionStorage.getItem("username");
+    // const pw = sessionStorage.getItem("password");
 
     http_request = new XMLHttpRequest();
     http_request.onload = function (xhr) {
@@ -11,6 +11,7 @@ function GetBindData() {
                 const data = JSON.parse(xhr.target.response);
                 BindDataToTable(data);
                 if (sessionStorage.getItem("username") != null) {
+                    GetDeleteData();
                     showLoggedDashboard();
                 }
                 break;
@@ -29,7 +30,7 @@ function GetBindData() {
 }
 
 function BindDataToTable(data) {
-    console.log(data)
+    // console.log(data)
     if (data != null && data) {
         let recipes = '';
         for (let i = 0; i < data.length; i += 3) {
@@ -46,6 +47,91 @@ function BindDataToTable(data) {
             recipes += TripleTileHTML(tiles)
         }
         document.getElementById("tblbody").innerHTML = recipes;
+    }
+}
+
+function GetDeleteData() {
+    let url = "http://localhost:8080/RecipeApp/dashboard/user";
+    if (sessionStorage.getItem("username") === "admin") {
+        url = "http://localhost:8080/RecipeApp/dashboard/all";
+    }
+    const un = sessionStorage.getItem("username");
+    const pw = sessionStorage.getItem("password");
+
+    http_request = new XMLHttpRequest();
+    http_request.onload = function (xhr) {
+        switch (xhr.target.status) {
+            case 200:
+                const data = JSON.parse(xhr.target.response);
+                BindDataToDeleteTable(data);
+                break;
+            case 401:
+                logout();
+                break;
+            default:
+                console.log('blad');
+                console.log(xhr.target)
+        }
+    };
+
+    http_request.open('GET', url, true);
+    http_request.setRequestHeader("Authorization", "Basic " + btoa(unescape(encodeURIComponent(un + ":" + pw))));
+    http_request.send(null);
+}
+
+function BindDataToDeleteTable(data) {
+    // console.log(data)
+    if (data != null && data) {
+        let recipes = '';
+        const optionStart = '<option value="';
+        const optionBetween = '">'
+        const optionEnd = '</option>';
+        for (let i = 0; i < data.length; i ++) {
+            recipes += optionStart + data[i].id + optionBetween + data[i].name + optionEnd;
+        }
+        document.getElementById("recipesToDelete").innerHTML = recipes;
+    }
+}
+
+function GetUserDeleteData() {
+    let url = "http://localhost:8080/RecipeApp/user_dashboard";
+    const un = sessionStorage.getItem("username");
+    const pw = sessionStorage.getItem("password");
+
+    http_request = new XMLHttpRequest();
+    http_request.onload = function (xhr) {
+        switch (xhr.target.status) {
+            case 200:
+                const data = JSON.parse(xhr.target.response);
+                BindDataToDeleteUserTable(data);
+                break;
+            case 401:
+                logout();
+                break;
+            default:
+                console.log('blad');
+                console.log(xhr.target)
+        }
+    };
+
+    http_request.open('GET', url, true);
+    http_request.setRequestHeader("Authorization", "Basic " + btoa(unescape(encodeURIComponent(un + ":" + pw))));
+    http_request.send(null);
+}
+
+function BindDataToDeleteUserTable(data) {
+    // console.log(data)
+    if (data != null && data) {
+        let recipes = '';
+        const optionStart = '<option value="';
+        const optionBetween = '">'
+        const optionEnd = '</option>';
+        for (let i = 0; i < data.length; i ++) {
+            if(data[i].login !== "admin") {
+                recipes += optionStart + data[i].id + optionBetween + data[i].login + optionEnd;
+            }
+        }
+        document.getElementById("usersToDelete").innerHTML = recipes;
     }
 }
 
@@ -86,16 +172,24 @@ function SingleTileHTML(recipeJson) {
 }
 
 function showRecipe(id) {
-    console.log("in show recipe?")
+    // console.log("in show recipe?")
     sessionStorage.setItem("recipe", id);
     window.location.href = "recipe.html";
 }
 
 function showLoggedDashboard() {
-    var adminElements = document.getElementsByClassName("logged-visible");
-    for (var i = 0; i < adminElements.length; i++) {
-        adminElements[i].style.display = "block";
+    var loggedElements = document.getElementsByClassName("logged-visible");
+    for (var i = 0; i < loggedElements.length; i++) {
+        loggedElements[i].style.display = "block";
     }
+    if (sessionStorage.getItem("username") === "admin"){
+        var adminElements = document.getElementsByClassName("admin-visible");
+        for (var i = 0; i < adminElements.length; i++) {
+            adminElements[i].style.display = "block";
+        }
+        GetUserDeleteData();
+    }
+
     document.getElementById("logout-btn-text").innerHTML = "Logout";
 }
 
@@ -105,8 +199,8 @@ function addRecipe(form) {
     const d = form.Description.value;
     const s = form.Stars.value;
     let u = form.Url.value;
-    console.log("got add recipe data");
-    console.log(n, i, d, s, u)
+    // console.log("got add recipe data");
+    // console.log(n, i, d, s, u)
     if (u == null || u.length == 0) {
         u = "https://www.publicdomainpictures.net/pictures/80000/velka/cat-dressed-vintage-photo-1393856213kEy.jpg";
     }
@@ -117,7 +211,7 @@ function addRecipe(form) {
         "level": s,
         "url": u
     };
-    console.log(json)
+    // console.log(json)
 
     const url = "http://localhost:8080/RecipeApp/dashboard";
     const un = sessionStorage.getItem("username");
@@ -129,6 +223,7 @@ function addRecipe(form) {
             case 200:
                 var data = JSON.parse(xhr.target.response);
                 BindDataToTable(data);
+                GetDeleteData();
                 showLoggedDashboard();
                 break;
             case 401:
@@ -151,6 +246,7 @@ function addRecipe(form) {
                     }
                 }
                 GetBindData();
+
                 break;
             default:
                 console.log('blad');
@@ -164,19 +260,49 @@ function addRecipe(form) {
     http_request.send(JSON.stringify(json));
 }
 
-function deleteBook(id) {
-    console.log("got delete book data");
-    console.log(id)
+function deleteRecipe(form) {
+    const id = form.recipeName.value;
+    // console.log("got delete recipe data");
+    // console.log(id)
 
-    const url = "http://localhost:8080/RecipeApp/dashboard/" + id;
+    let url = "http://localhost:8080/RecipeApp/dashboard/user/" + id;
+    if (sessionStorage.getItem("username") === "admin") {
+        url = "http://localhost:8080/RecipeApp/dashboard/admin/" + id;
+    }
     const un = sessionStorage.getItem("username");
     const pw = sessionStorage.getItem("password");
 
     http_request = new XMLHttpRequest();
     http_request.onload = function (xhr) {
-        if (xhr.target.status == 200) {
+        if (xhr.target.status === 200) {
             var data = JSON.parse(xhr.target.response);
             GetBindData();
+            GetDeleteData();
+            showLoggedDashboard();
+        } else {
+            console.log('blad');
+            console.log(xhr.target)
+        }
+    };
+
+    http_request.open('DELETE', url, true);
+    http_request.setRequestHeader("Authorization", "Basic " + btoa(unescape(encodeURIComponent(un + ":" + pw))));
+    http_request.send(null);
+}
+
+function deleteUser(form) {
+    const id = form.username.value;
+
+    let url = "http://localhost:8080/RecipeApp/user_dashboard/" + id;
+    const un = sessionStorage.getItem("username");
+    const pw = sessionStorage.getItem("password");
+
+    http_request = new XMLHttpRequest();
+    http_request.onload = function (xhr) {
+        if (xhr.target.status === 200) {
+            var data = JSON.parse(xhr.target.response);
+            GetBindData();
+            GetDeleteData();
             showLoggedDashboard();
         } else {
             console.log('blad');
@@ -190,7 +316,7 @@ function deleteBook(id) {
 }
 
 function logout() {
-    console.log("in logout")
+    // console.log("in logout")
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('password');
     window.location.href = "login.html";
